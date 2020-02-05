@@ -3,7 +3,25 @@ import axios from "axios";
 class App extends Component {
   state = {
     title: "",
-    body: ""
+    body: "",
+    post: []
+  };
+
+  componentDidMount = () => {
+    this.getBlogPost();
+  };
+
+  getBlogPost = () => {
+    axios
+      .get("/api")
+      .then(response => {
+        const data = response.data;
+        this.setState({ post: data });
+        console.log("Data has been recieved");
+      })
+      .catch(() => {
+        alert("Error retrieving Data!!!");
+      });
   };
 
   handleChange = event => {
@@ -31,6 +49,7 @@ class App extends Component {
       .then(() => {
         console.log("Data has been send to server");
         this.resetState();
+        this.getBlogPost();
       })
       .catch(() => {
         console.log("Internal server problem");
@@ -42,6 +61,16 @@ class App extends Component {
       title: "",
       body: ""
     });
+  };
+  display = posts => {
+    if (!posts.length) return null;
+
+    return posts.map((post, index) => (
+      <div key={index}>
+        <h3>{post.title}</h3>
+        <p>{post.body}</p>
+      </div>
+    ));
   };
   render() {
     console.log(this.state);
@@ -70,6 +99,7 @@ class App extends Component {
           </div>
           <button type="submit">Submit</button>
         </form>
+        <div>{this.display(this.state.post)}</div>
       </div>
     );
   }
