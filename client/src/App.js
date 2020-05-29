@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import axios from "axios";
+import "./App.css";
 class App extends Component {
   state = {
     title: "",
     body: "",
-    post: []
+    post: [],
   };
 
   componentDidMount = () => {
@@ -14,7 +15,7 @@ class App extends Component {
   getBlogPost = () => {
     axios
       .get("/api")
-      .then(response => {
+      .then((response) => {
         const data = response.data;
         this.setState({ post: data });
         console.log("Data has been recieved");
@@ -24,59 +25,96 @@ class App extends Component {
       });
   };
 
-  handleChange = event => {
+  handleChange = (event) => {
     const Target = event.target;
     const name = Target.name;
     const value = Target.value;
 
     this.setState({
-      [name]: value
+      [name]: value,
     });
   };
 
-  submit = event => {
+  submit = (event) => {
     event.preventDefault();
 
     const payload = {
       title: this.state.title,
-      body: this.state.body
+      body: this.state.body,
+      upvotes: 0,
+      downvotes: 0,
     };
     axios({
       url: "/api/save",
       method: "POST",
-      data: payload
-    })
-      .then(() => {
-        console.log("Data has been send to server");
-        this.resetState();
+      data: payload,
+    }).then(() => {
+      this.resetState();
+      this.getBlogPost();
+    });
+  };
+  vote = (_id, num) => {
+    var votes = this.state.post;
+    var totalvote = votes.filter((vote) => vote._id === _id);
+    if (num === 1) {
+      const payload = {
+        id: _id,
+        upvote: totalvote[0].upvotes + num,
+        downvote: totalvote[0].downvotes,
+      };
+      axios({
+        url: "/api/vote",
+        method: "POST",
+        data: payload,
+      }).then(() => {
         this.getBlogPost();
-      })
-      .catch(() => {
-        console.log("Internal server problem");
       });
+    } else {
+      const payload = {
+        id: _id,
+        upvote: totalvote[0].upvotes,
+        downvote: totalvote[0].downvotes - num,
+      };
+      axios({
+        url: "/api/vote",
+        method: "POST",
+        data: payload,
+      }).then(() => {
+        this.getBlogPost();
+      });
+    }
   };
 
   resetState = () => {
     this.setState({
       title: "",
-      body: ""
+      body: "",
     });
   };
-  display = posts => {
+  display = (posts) => {
     if (!posts.length) return null;
 
-    return posts.map((post, index) => (
-      <div key={index}>
-        <h3>{post.title}</h3>
-        <p>{post.body}</p>
+    return posts.map((e) => (
+      <div key={e._id}>
+        <div key={e._id}>
+          <h3>{e.title}</h3>
+          <p>{e.body}</p>
+        </div>
+        <div>
+          <button onClick={() => this.vote(e._id, 1)}>Upvote</button>
+          <button onClick={() => this.vote(e._id, -1)}>Downvote</button>
+        </div>
+        <div>Upvote:{e.upvotes}</div>
+        <div>Downvote:{e.downvotes}</div>
       </div>
     ));
   };
+
   render() {
     console.log(this.state);
     return (
-      <div>
-        <h2>Welcome to my App</h2>
+      <div className="outercontainer">
+        <h2>Comments</h2>
         <form onSubmit={this.submit}>
           <div className="form-input">
             <input
