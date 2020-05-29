@@ -1,22 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
-const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 8080;
+const cors = require("cors");
 
 const Router = require("../server/router/api");
-//HomeBoy123
 
-// const MONGDB_URI =
-//   "mongodb+srv://ATOM03:HomeBoy123@cluster0-mnfeh.mongodb.net/test?retryWrites=true&w=majority";
+const MONGDB_URI =
+  "mongodb+srv://dbUser:dbUser@commentpost-qrj5d.mongodb.net/test?retryWrites=true&w=majority";
 
 mongoose
-  .connect(process.env.MONGODB_URI || "mongodb://localhost/Post", {
+  .connect(MONGDB_URI || "mongodb://localhost/Post", {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
   })
-  .catch(err => console.log("Caught", err.stack));
+  .catch((err) => console.log("Caught", err.stack));
 
 mongoose.connection.on("connected", () => {
   console.log("Mongoose is Connected!!!!");
@@ -24,31 +23,9 @@ mongoose.connection.on("connected", () => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-//Schem
-const data = {
-  title: "Welcome Priyanshu",
-  body: "Hi Priyanshu,You are Selected For amazon Software Developer"
-};
-
-// const newBlogPost = new BlogPost(data);
-// newBlogPost.save(error => {
-//   if (error) {
-//     console.log("Opps,Something Happend");
-//   } else {
-//     console.log("Data has been saved");
-//   }
-// });
-
 app.use(morgan("tiny"));
+app.use(cors());
 
 app.use("/api", Router);
-
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(__dirname + "client/build"));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
-  });
-}
 
 app.listen(PORT, console.log(`Server is Running at ${PORT}`));
