@@ -6,6 +6,8 @@ const PORT = process.env.PORT || 8080;
 const cors = require("cors");
 
 const Router = require("../server/router/api");
+const Router1 = require("./router/Register");
+const Router2 = require("./router/Login");
 
 const MONGDB_URI =
   "mongodb+srv://dbUser:dbUser@commentpost-qrj5d.mongodb.net/test?retryWrites=true&w=majority";
@@ -27,5 +29,7 @@ app.use(morgan("tiny"));
 app.use(cors());
 
 app.use("/api", Router);
+app.use("/register", Router1);
+app.use("/login", Router2);
 
 app.listen(PORT, console.log(`Server is Running at ${PORT}`));
